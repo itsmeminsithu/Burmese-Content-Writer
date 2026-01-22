@@ -89,12 +89,6 @@ export interface CalendarResult {
   entries: CalendarEntry[];
 }
 
-export interface PromptPack {
-  prompts: { category: string; prompt: string }[];
-  toneStyleLibrary: string;
-  calendarGeneratorPrompt: string;
-}
-
 export interface KnowledgeEntry {
   id: string;
   keyword: string;
@@ -113,4 +107,9 @@ export interface AppState {
   language: Language;
   topCategories: string[];
   knowledgeBase: KnowledgeEntry[];
+  copyHistory: string[];
+  copyCount: number;
+  categoryTraining: Record<string, string[]>;
+  savedDrafts: GeneratedPost[];
+  selectedEmojiSet: string;
 }

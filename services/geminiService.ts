@@ -1,65 +1,71 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { AppState, GenerationResult, CalendarResult, PromptPack, KnowledgeEntry } from "../types";
+import { AppState, GenerationResult, CalendarResult, KnowledgeEntry } from "../types";
 
 export const generateContent = async (state: AppState): Promise<GenerationResult> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
+  const topicTraining = state.categoryTraining[state.topic] || [];
+  const trainingInstructions = topicTraining.length > 0
+    ? `SPECIFIC CATEGORY STYLE ANCHOR (Replicate this exact rhythm for ${state.topic}):
+       ${topicTraining.map((t, i) => `Sample ${i + 1}:\n${t}`).join('\n---\n')}
+       
+       MANDATORY STYLE REPLICATION:
+       1. Replicate emoji density and placement.
+       2. Replicate the specific level of technicality/politeness.
+       3. Replicate the typical persuasive flow.`
+    : '';
+
+  const learnedPreferences = state.copyHistory.length > 0 
+    ? `USER PREFERENCE FEEDBACK:
+       ${state.copyHistory.map((text, i) => `Sample:\n${text}`).slice(-3).join('\n---\n')}`
+    : '';
+
+  const emojiInstructions = `Incorporate these emojis naturally: ${state.selectedEmojiSet}`;
+
   const systemInstruction = `
     You are a world-class Myanmar (Burmese) language editor and expert content strategist for ${state.brand}.
     
-    CRITICAL GRAMMAR STANDARDS:
-    - Use Standard Myanmar Burmese (မြန်မာစာ စံနှုန်း) exclusively.
-    - Ensure sentence endings are professional (ပါသည်၊ ပါတယ်) and logically linked.
-    - No slang, no hype, no unnecessary English loanwords.
+    CRITICAL: SERVICE ISOLATION PROTOCOL
+    - You must strictly isolate the current topic: "${state.topic}".
+    - DO NOT mix services. If the topic is "Airport Assistant", DO NOT mention TM30 or Visa Extensions unless explicitly requested.
+    - Treat each service as a distinct business vertical. 
+    - Ignored mismatched facts from the Knowledge Bank. If a fact keyword is "TM30" and the topic is "Airport", DISCARD that fact.
 
     KNOWLEDGE BANK INTEGRATION:
-    - Use the following facts if they relate to the topic:
-    ${state.knowledgeBase.map(k => `${k.keyword}: ${k.fact}`).join('\n')}
+    - ONLY integrate the following facts if they are SEMANTICALLY RELEVANT to "${state.topic}":
+    ${state.knowledgeBase.map(k => `[Fact for ${k.keyword}]: ${k.fact}`).join('\n')}
 
-    LENGTH CONTROL:
-    - Strictly follow ${state.contentLength}.
-    - Short: Snappy (3-4 sentences).
-    - Medium: Balanced (2-3 paragraphs).
-    - Long: Comprehensive (4+ paragraphs).
-
-    FORMAT SPECIALIZATION (MANDATORY STRUCTURE):
-    - 'Detailed Article': 
-        1. H1 Title: A compelling headline.
-        2. Lead Paragraph: A strong hook that summarizes the value.
-        3. 2-3 Section Subheadings: Use Markdown H2 (## ခေါင်းစဉ်) to divide sections.
-        4. Detailed Body Content: Rich information under each subheading.
-        5. Summary Conclusion: A professional wrap-up of the key points.
-    - 'Whitepaper Guide':
-        1. Professional Title.
-        2. Executive Summary (အနှစ်ချုပ်): High-level overview.
-        3. Background/Context (လက်ရှိအခြေအနေ): Problem statement.
-        4. Detailed Analysis/Solution (သုံးသပ်ချက်နှင့် ဖြေရှင်းချက်): Use H2 headers for sections.
-        5. Expert Recommendations (အကြံပြုချက်များ): Actionable advice.
-    - 'Formal Press Release': Diplomatic Myanmar prose with Dateline, Lead, Quote, and Boilerplate.
-    - 'Social Media': Engaging, polite, and authoritative with clear bullet points.
-
-    TONE & INTENT:
+    TONE SPECIALIZATION:
     - Base Tone: ${state.tone}.
-    - Goal: ${state.intent}.
+    - If 'Authoritative/Legal': Use highly formal, precise Myanmar legal terminology (e.g., "ဥပဒေအရ", "စည်းမျဉ်းစည်းကမ်းနှင့်အညီ"). Avoid conversational particles.
+    
+    FORMAT SPECIALIZATION:
+    - Base Format: ${state.format}.
+    - If 'Formal Press Release': Use the standard PR structure: [မြို့အမည်]၊ [နေ့စွဲ] — [သတင်းခေါင်းစဉ်]၊ [သတင်းကိုယ်ထည်]၊ [Media Contact/Boilerplate]. Use diplomatic Myanmar prose.
+
+    READABILITY & FLOW:
+    - Use short paragraphs and clear line breaks (\n\n).
+    - Ensure text is scannable.
+
+    HASHTAG STRATEGY:
+    - Generate 5-8 relevant hashtags in English and Burmese.
   `;
 
   const prompt = `
+    Generate content for:
     Topic: ${state.topic}
     Format: ${state.format}
+    Tone: ${state.tone}
     Intent: ${state.intent}
     Length: ${state.contentLength}
-    Tone: ${state.tone}
-    [COMPETITOR DNA]: ${state.competitors || 'None. Use pro-baseline.'}
+    
+    Competitor Patterns to mimic (if any): ${state.competitors || 'None. Rely on internal logic.'}
 
-    TASK:
-    - 3 Patterns: Structural logic analysis.
-    - 3 Original Drafts: Fully polished Myanmar drafts. 
-        * For 'Detailed Article', ensure the output follows the 5-point structure (H1, Lead, H2 Sections, Body, Conclusion).
-        * For 'Whitepaper Guide', follow the strategic education structure.
-        * Use Markdown for headers within the 'body' property.
-    - 3 Tone Variants: Professional, Authoritative/Legal, Luxury VIP.
-    - 2 Style Variants: Minimalist, Narrative.
+    YOUR TASK:
+    - 3 Patterns: Analyze the structural logic of this service.
+    - 3 Original Drafts: ad-ready content.
+    - Variants: Provide 3 tone variants and 2 style variants.
   `;
 
   const response = await ai.models.generateContent({
@@ -89,9 +95,9 @@ export const generateContent = async (state: AppState): Promise<GenerationResult
               type: Type.OBJECT,
               properties: {
                 id: { type: Type.STRING },
-                title: { type: Type.STRING, description: "The H1 Title for Articles/Whitepapers or the primary headline." },
-                hook: { type: Type.STRING, description: "The lead paragraph or initial hook of the content." },
-                body: { type: Type.STRING, description: "The main content. For Articles/Whitepapers, include Markdown H2 subheadings and detailed sections here." },
+                title: { type: Type.STRING },
+                hook: { type: Type.STRING },
+                body: { type: Type.STRING },
                 cta: { type: Type.STRING },
                 emojis: { type: Type.STRING },
                 hashtags: { type: Type.STRING },
@@ -131,46 +137,24 @@ export const generateContent = async (state: AppState): Promise<GenerationResult
 };
 
 export const generateSmartReply = async (clientMessage: string, knowledge: KnowledgeEntry[], brandName: string): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-  const systemInstruction = `You are the 'Memory-Link' AI for ${brandName}. Answer client questions based on provided facts with perfect Myanmar grammar. Tone: Calm, elite, respectful.`;
-  const memoryContext = knowledge.map(k => `[FACT: ${k.keyword}] -> ${k.fact}`).join('\n');
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const systemInstruction = `You are a professional assistant for ${brandName}. Answer based ONLY on verified facts.`;
+  const memoryContext = knowledge.map(k => `Fact: ${k.keyword} - ${k.fact}`).join('\n');
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
-    contents: `KNOWLEDGE:\n${memoryContext}\n\nQUESTION: "${clientMessage}"`,
-    config: { systemInstruction, temperature: 0.2 },
+    model: 'gemini-3-flash-preview',
+    contents: `FACTS:\n${memoryContext}\n\nQUESTION: "${clientMessage}"`,
+    config: { systemInstruction, temperature: 0.1 },
   });
   return response.text || "တောင်းပန်ပါသည်။ ပြန်လည်ဖြေကြားရန် အဆင်မပြေဖြစ်နေပါသည်။";
 };
 
-export const generateStrategyPack = async (state: AppState): Promise<PromptPack> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
-    contents: `Build strategy for ${state.brand}`,
-    config: {
-      systemInstruction: "Brand consultant mode.",
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          prompts: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { category: { type: Type.STRING }, prompt: { type: Type.STRING } }, required: ['category', 'prompt'] } },
-          toneStyleLibrary: { type: Type.STRING },
-          calendarGeneratorPrompt: { type: Type.STRING }
-        },
-        required: ['prompts', 'toneStyleLibrary', 'calendarGeneratorPrompt']
-      }
-    }
-  });
-  return JSON.parse(response.text.trim());
-};
-
 export const generateCalendar = async (state: AppState): Promise<CalendarResult> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
-    contents: `Plan 30 days for ${state.brand}`,
+    model: 'gemini-3-flash-preview',
+    contents: `Plan 30 days of strategic content for ${state.brand}.`,
     config: {
-      systemInstruction: "Content manager mode.",
+      systemInstruction: "You are a senior content planner.",
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,

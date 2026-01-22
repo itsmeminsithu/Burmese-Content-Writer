@@ -2,6 +2,14 @@
 import React from 'react';
 import { AppState, ContentFormat, ContentLength, Tone, Intent, Language, KnowledgeEntry } from './types';
 
+export const EMOJI_SETS = [
+  { name: 'Professional', icons: '🇹🇭 📋 🤝 ✨' },
+  { name: 'Travel', icons: '✈️ 🏝️ 📸 🎒' },
+  { name: 'Urgent', icons: '⚠️ ⚡ 🕒 📢' },
+  { name: 'VIP/Luxury', icons: '💎 👑 🌟 🎩' },
+  { name: 'Helpful', icons: '💡 ✅ 💬 🙋‍♂️' }
+];
+
 export const DEFAULT_KNOWLEDGE: KnowledgeEntry[] = [
   { id: '1', keyword: 'TR Visa Extension Price', fact: 'TR Visa extension costs 1,900 THB for the official fee. Service fee is additional depending on document support.' },
   { id: '2', keyword: 'Extension Duration', fact: 'A Tourist Visa (TR) can usually be extended for an additional 30 days.' },
@@ -10,20 +18,6 @@ export const DEFAULT_KNOWLEDGE: KnowledgeEntry[] = [
   { id: '5', keyword: 'TM30 Service', fact: 'TM30 Form အမြန်ရရှိရေး ဝန်ဆောင်မှု။ ၁၅ မိနစ်အတွင်း အပြီးအစီး ဆောင်ရွက်ပေးသည်။ ဝန်ဆောင်ခ ၁၅၀ ဘတ် (150 THB) သာ ကျသင့်မည်။ လိုအပ်သော စာရွက်စာတမ်းများမှာ - အိမ်ရှင်၏ ID၊ အိမ်လိပ်စာ အပြည့်အစုံ နှင့် အိမ်လိပ်စာချုပ် (House Contract) တို့ ဖြစ်ပါသည်။' },
   { id: '6', keyword: 'Letter Service', fact: 'သံရုံးထောက်ခံစာ (Embassy Letter) နှင့် အခြား လိုအပ်သော ထောက်ခံစာများအား ကျွမ်းကျင်စွာ စီစဉ်ဆောင်ရွက်ပေးပါသည်။' }
 ];
-
-export const DEFAULT_STATE: AppState = {
-  brand: 'Thailand Easy Pass / Easy Visa For Myanmar',
-  audience: 'Myanmar travelers to Thailand',
-  competitors: '',
-  topic: 'Visa Extension',
-  format: ContentFormat.FACEBOOK,
-  contentLength: ContentLength.MEDIUM,
-  tone: Tone.CALM,
-  intent: Intent.TRUST,
-  language: Language.BURMESE,
-  topCategories: ['Visa Extension', 'TDAC Registration', 'TR Visa Support', 'Airport Assistant', 'Knowledge Post'],
-  knowledgeBase: DEFAULT_KNOWLEDGE
-};
 
 export const CATEGORIES = [
   'Visa Extension',
@@ -38,6 +32,25 @@ export const CATEGORIES = [
   'Elite VIP Service',
   'Arrival Tips'
 ];
+
+export const DEFAULT_STATE: AppState = {
+  brand: 'Thailand Easy Pass / Easy Visa For Myanmar',
+  audience: 'Myanmar travelers to Thailand',
+  competitors: '',
+  topic: CATEGORIES[0],
+  format: ContentFormat.FACEBOOK,
+  contentLength: ContentLength.MEDIUM,
+  tone: Tone.CALM,
+  intent: Intent.TRUST,
+  language: Language.BURMESE,
+  topCategories: CATEGORIES.slice(0, 5),
+  knowledgeBase: DEFAULT_KNOWLEDGE,
+  copyHistory: [],
+  copyCount: 0,
+  categoryTraining: CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat]: [] }), {}),
+  savedDrafts: [],
+  selectedEmojiSet: EMOJI_SETS[0].icons
+};
 
 export const ICONS = {
   Brand: () => (
@@ -58,6 +71,11 @@ export const ICONS = {
   Inbox: () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+    </svg>
+  ),
+  Lab: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.727 2.903a2 2 0 01-3.566 0l-.727-2.903a2 2 0 00-1.96-1.414l-2.387.477a2 2 0 00-1.022.547l2.146 2.146a2 2 0 010 2.828l-1.414 1.414a2 2 0 01-2.828 0l-1.414-1.414a2 2 0 010-2.828l2.146-2.146z" />
     </svg>
   )
 };
