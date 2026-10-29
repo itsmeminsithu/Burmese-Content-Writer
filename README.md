@@ -4,39 +4,27 @@
 
 # Burmese Content Writer (Thailand Easy Pass Content AI)
 
-A React + Vite web app that drafts Myanmar-language marketing content for
-"Thailand Easy Pass / Easy Visa For Myanmar", aimed at Myanmar travellers to
-Thailand. Content is generated with the Gemini API and can be tuned, saved as
-a draft, and reused.
+React + Vite app that drafts Myanmar-language marketing content for "Thailand Easy Pass / Easy Visa For Myanmar", for Myanmar travellers to Thailand. Posts come from the Gemini API. You can tune them, save them as drafts, and reuse them.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1tc5tIIAifsymZtv4XZlF5tKyXMs0bQ-B
 
-## Features
+## What it does
 
-- AI post generation by service category: Visa Extension, TDAC Registration,
-  TM30 Service, Letter Service, TR Visa Support, Airport Assistant, Knowledge
-  Post, Document Checklist, Health Insurance, Elite VIP Service, and Arrival
-  Tips.
-- Controls for content format, length, tone, intent, and language, plus
-  selectable emoji sets.
-- Per-category style training: paste sample posts and the generator is
-  instructed to replicate their rhythm, emoji use, and persuasive flow.
-- Copy-history feedback: recent copied posts are fed back as style
-  preferences for later generations.
+- Generates posts by service category: Visa Extension, TDAC Registration, TM30 Service, Letter Service, TR Visa Support, Airport Assistant, Knowledge Post, Document Checklist, Health Insurance, Elite VIP Service, Arrival Tips.
+- Controls for format, length, tone, intent, and language, plus emoji sets you can pick from.
+- Per-category style training: paste sample posts and the generator is told to copy their rhythm, emoji use, and flow.
+- Copy-history feedback: recent copied posts are fed back as style preferences for later runs.
 - Content calendar generation for planned posts.
-- Smart Reply inbox: draft a reply to a client message using the editable
-  knowledge base of service facts.
-- Editable knowledge base (add, search, and remove entries) and saved drafts.
-- App state, drafts, and knowledge entries persist in the browser's
-  localStorage — there is no backend or database in this repo.
+- Smart Reply inbox: drafts a reply to a client message using the editable knowledge base of service facts.
+- Editable knowledge base (add, search, remove entries) and saved drafts.
+- State, drafts, and knowledge entries sit in the browser's localStorage. There is no backend or database in this repo.
 
-## Tech Stack
+## Stack
 
 - React 19, TypeScript, Vite 6
 - Tailwind CSS (via CDN in `index.html`)
 - Google Gemini API (`@google/genai`)
 
-## Project Structure
+## Structure
 
 ```txt
 Burmese-Content-Writer/
@@ -53,37 +41,24 @@ Burmese-Content-Writer/
 └── metadata.json
 ```
 
-## Run Locally
+## Run it
 
-**Prerequisites:** Node.js
+You need Node.js.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. `npm install`
+2. Set `GEMINI_API_KEY` in [.env.local](.env.local)
+3. `npm run dev`
 
-Other scripts: `npm run build` builds for production, `npm run preview`
-previews the production build locally.
+`npm run build` builds for production. `npm run preview` serves that build locally.
 
 ## Live preview (GitHub Pages — post-merge step, not yet live)
 
-This is a Vite app, so Pages serves the production build, not the source
-tree — and no mock or screenshot page has been added:
+Pages serves the production build of a Vite app, not the source tree. No mock or screenshot page has been added.
 
-- `vite.config.ts` now sets `base: '/Burmese-Content-Writer/'`, which is
-  required for a project Pages site at
-  `https://itsmeminsithu.github.io/Burmese-Content-Writer/`.
-- After this PR is merged, add a Pages build workflow manually via the GitHub
-  web UI (workflow files cannot be pushed through the Muse GitHub App — they
-  return 403). The workflow is described in full in the PR description: it
-  installs dependencies, runs `npm run build`, and deploys `dist/` with
-  GitHub Pages. The repository's Pages source then becomes GitHub Actions.
-- Pages is NOT live until that workflow file exists, a run succeeds, and the
-  URL actually loads — this PR alone does not make it live.
-- Note: the Gemini features in the preview need a `GEMINI_API_KEY` secret
-  available at build time (the app inlines it via `vite.config.ts`); without
-  it, the page loads but AI generation calls will fail.
+- `vite.config.ts` sets `base: '/Burmese-Content-Writer/'`, which a project Pages site at `https://itsmeminsithu.github.io/Burmese-Content-Writer/` needs.
+- After this PR is merged, add a Pages build workflow by hand in the GitHub web UI. Workflow files cannot be pushed through the Muse GitHub App — they return 403. The workflow is described in full in the PR description: install dependencies, run `npm run build`, deploy `dist/` with GitHub Pages. Pages source then becomes GitHub Actions.
+- Pages is not live until that workflow file exists, a run succeeds, and the URL loads. This PR alone does not make it live.
+- The Gemini features need a `GEMINI_API_KEY` secret at build time (the app inlines it via `vite.config.ts`). Without it the page loads, but AI generation calls fail.
 
 ## License
 
